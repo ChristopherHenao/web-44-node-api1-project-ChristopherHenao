@@ -33,12 +33,29 @@ server.post("/api/users", (req, res) => {
 
 // GET /api/users (returns an array of users)
 server.get("/api/users", (req, res) => {
-    res.json('foo')
+    Users.find()
+    .then(users => {
+        res.status(200).json(users)
+    })
+    .catch(err => {
+        res.status(500).json({ message: "The users information could not be retrieved" })
+    })
 })
 
 // GET /api/users/:id (returns the user object with the specified 'id')
-server.get("/api/users", (req, res) => {
-    res.json('foo')
+server.get("/api/users/:id", (req, res) => {
+    const { id } = req.params
+    Users.findById(id)
+    .then(user => {
+        if(!user) {
+            res.status(404).json({ message: "The user with the specified ID does not exist" })
+        } else {
+            res.status(200).json(user)
+        }
+    })
+    .catch(err => {
+        res.status(500).json({ message: "The user information could not be retrieved" })
+    })
 })
 
 // DELETE /api/users/:id (Removes the user with the specified `id` and returns the deleted user)

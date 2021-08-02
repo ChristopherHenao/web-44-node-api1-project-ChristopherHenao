@@ -6,23 +6,17 @@ const server = express()
 
 server.use(express.json())
 
-// | Method | URL            | Description                                                                                            |
-// | ------ | -------------- | ------------------------------------------------------------------------------------------------------ |
-// | POST   | /api/users     | Creates a user using the information sent inside the `request body`.                                   |
-// | GET    | /api/users     | Returns an array users.                                                                                |
-// | GET    | /api/users/:id | Returns the user object with the specified `id`.                                                       |
-// | DELETE | /api/users/:id | Removes the user with the specified `id` and returns the deleted user.                                 |
-// | PUT    | /api/users/:id | Updates the user with the specified `id` using data from the `request body`. Returns the modified user |
 
+// Endpoints
 // POST /api/users (Creates a user)
 server.post("/api/users", (req, res) => {
-    // res.json('foo')
     const { name, bio } = req.body
     Users.insert({ name, bio })
     .then(user => {
         if(!name || !bio) {
             res.status(400).json({ message: "Please provide name and bio for the user" })
-        } else {
+        } 
+        else {
             res.status(201).json(user)
         } 
     })
@@ -49,7 +43,8 @@ server.get("/api/users/:id", (req, res) => {
     .then(user => {
         if(!user) {
             res.status(404).json({ message: "The user with the specified ID does not exist" })
-        } else {
+        } 
+        else {
             res.status(200).json(user)
         }
     })
@@ -60,12 +55,40 @@ server.get("/api/users/:id", (req, res) => {
 
 // DELETE /api/users/:id (Removes the user with the specified `id` and returns the deleted user)
 server.delete("/api/users/:id", (req, res) => {
-    res.json('foo')
+    const { id } = req.params
+    Users.remove(id)
+    .then(deleted => {
+        if(!deleted) {
+            res.status(404).json({ message: "The user with the specified ID does not exist" })
+        } 
+        else {
+            res.status(200).json(deleted)
+        }
+    })
+    .catch(err => {
+        res.status(500).json({ message: "The user could not be removed" })
+    })
 })
 
 // PUT /api/users/:id (Updates the user with the specified `id` using data from the `request body`. Returns the modified user)
 server.put("/api/users/:id", (req, res) => {
-    res.json('foo')
+    const { id } = req.params
+    const { name, bio } = req.body
+    Users.update(id, { name, bio })
+    .then(user => {
+        if  (!name || !bio) {
+            res.status(400).json({ message: "provide name and bio" })
+        } 
+        else if (!user) {
+            res.status(404).json({ message: "The user with the specified ID does not exist" })
+        } 
+        else {
+            res.json(user)
+        }
+    })
+    .catch(err => {
+        res.status(500).json({ message: "The user information could not be modified" })
+    })
 })
 
 module.exports = server; // EXPORT YOUR SERVER instead of {}
